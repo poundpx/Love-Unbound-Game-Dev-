@@ -4,104 +4,47 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    [Header("Movement")]
-    public float moveSpeed;
-    public Transform orientation;
+    public CharacterController characterController;
+    public float runSpeed = 20f;
+    public int health = 3;
+    public float walkSpeed = 12f;
+    public float gravity = -9.81f;
+    public Transform groundCheck;
+    public float groundDist = .4f;
+    public LayerMask groundLayerMask;
+    public float JumpHeight = 3f;
 
-
-
-    public float groundDrag;
-
-    public float jumpForce;
-    public float jumpCoolDown;
-    public float airMultiplier;
-    bool readyToJump;
-    [Header("Keybinds")]
-    public KeyCode jumpKey = KeyCode.Space;
-
-    [Header("Ground Check")]
-    public float playerHeight;
-    public LayerMask whatIsGround;
+    Vector3 velocity;
     bool grounded;
-
-    float horizontalInput;
-    float verticalInput;
-    Vector3 moveDirection;
-    Rigidbody rb;
-
-    //get rigidbody and prevent rotation when start game
-    private void Start()
+    // Update is called once per frame
+    void Update()
     {
-        rb = GetComponent<Rigidbody>();
-        rb.freezeRotation = true;
-        readyToJump = true;
-    }
-    //use update to get input each frame
-    private void Update()
-    {
-        //ground check
-        grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * .5f + .2f, whatIsGround);
+        //check for ground
+        grounded = Physics.CheckSphere(groundCheck.position, groundDist, groundLayerMask);
 
-        MyInput();
-        if (grounded)
+        if (grounded && velocity.y < 0)
         {
-            rb.drag = groundDrag;
+            velocity.y = -2f;
         }
-        else rb.drag = 0;
+        //movement
+        float x = Input.GetAxis("Horizontal");
+        float z = Input.GetAxis("Vertical");
 
-    }
-    //call physic engine update 
-    private void FixedUpdate()
-    {
-        MovePlayer();
-        SpeedControl();
-    }
+        Vector3 move = transform.right * x + transform.forward * z;
+        characterController.Move(move * walkSpeed * Time.deltaTime);
+        //Run
+        if (move != null & Input.GetKey(KeyCode.LeftShift))
+        {
+            characterController.Move(move * runSpeed * Time.deltaTime);
+        }
 
-    //get input and move player by add force to rigid body
-    private void MyInput()
-    {
-        horizontalInput = Input.GetAxisRaw("Horizontal");
-        verticalInput = Input.GetAxisRaw("Vertical");
-
-        //when to jump
-        if(Input.GetKey(jumpKey)&& readyToJump  && grounded)
+        //jump
+        if (Input.GetButtonDown("Jump") && grounded)
         {
-            Debug.Log("Player is jumping");
-            readyToJump = false;
-            Jump();
-            Invoke(nameof(ResetJump), jumpCoolDown);
+            velocity.y = Mathf.Sqrt(JumpHeight * -2f * gravity);
         }
-    }
-    private void MovePlayer()
-    {
-        moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
-        if (grounded)
-        {
-            rb.AddForce(moveDirection.normalized * moveSpeed * 10f, ForceMode.Force);
-        }
-        else if (!grounded)
-        {
-            rb.AddForce(moveDirection.normalized * moveSpeed * 10f *airMultiplier, ForceMode.Force);
-        }
-    }
-    private void SpeedControl()
-    {
-        Vector3 flatVel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-        if (flatVel.magnitude > moveSpeed)
-        {
-            Vector3 limitedVel = flatVel.normalized * moveSpeed;
-            rb.velocity = new Vector3(limitedVel.x,rb.velocity.y,limitedVel.z);
-        }
-    }
-    private void Jump()
-    {
-        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-        rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
-    }
-    private void ResetJump()
-    {
-
-        readyToJump = true;
+        velocity.y += gravity * Time.deltaTime;
+        characterController.Move(velocity * Time.deltaTime);
     }
 
 }
