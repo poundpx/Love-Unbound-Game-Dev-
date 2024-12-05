@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -13,9 +14,12 @@ public class PlayerMovement : MonoBehaviour
     public float groundDist = .4f;
     public LayerMask groundLayerMask;
     public float JumpHeight = 3f;
+    
+    private Animator animator;
 
     Vector3 velocity;
     bool grounded;
+
     // Update is called once per frame
     void Update()
     {
@@ -32,6 +36,7 @@ public class PlayerMovement : MonoBehaviour
 
         Vector3 move = transform.right * x + transform.forward * z;
         characterController.Move(move * walkSpeed * Time.deltaTime);
+
         //Run
         if (move != null & Input.GetKey(KeyCode.LeftShift))
         {
@@ -45,6 +50,7 @@ public class PlayerMovement : MonoBehaviour
         }
         velocity.y += gravity * Time.deltaTime;
         characterController.Move(velocity * Time.deltaTime);
+
     }
 
 }
