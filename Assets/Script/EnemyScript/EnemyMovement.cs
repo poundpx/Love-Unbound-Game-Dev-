@@ -2,31 +2,32 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
 
 public class EnemyMovement : MonoBehaviour
 {
-    public int health = 50;
-    public int damage = 1;
     public NavMeshAgent agent;
     public Transform player;
+    public GameObject playerCam;
     public LayerMask Player, Ground;
-    public GameObject shootingPos;
+    public Animator animator;
+    public AudioSource laughing;
+        public GameObject jumpCam;
 
     public Vector3 walkPoints;
     bool walkPointSet;
     public float walkPointRange;
 
-    public float timeBetweenAttck;
-    bool alreadyAttack;
-    public GameObject projectile;
-
     public float sightRange, attackRange;
     public bool playerInsightRange, playerInAttackRange;
+
+    Death dead;
 
     private void Awake()
     {
         player = GameObject.Find("Player").transform;
         agent = GetComponent<NavMeshAgent>();
+        animator = GetComponent<Animator>();
     }
 
     private void Update()
@@ -49,6 +50,9 @@ public class EnemyMovement : MonoBehaviour
         {
             walkPointSet = false;
         }
+        agent.speed = 3.5f;
+        animator.SetBool("Walk", true);
+        animator.SetBool("Run", false);
     }
 
     private void SearchWalkPoint()
@@ -66,36 +70,27 @@ public class EnemyMovement : MonoBehaviour
     private void ChasePlayer()
     {
         agent.SetDestination(player.position);
+        agent.speed = 10f;
+        animator.SetBool("Run", true);
+        animator.SetBool("Walk", false);
     }
     private void AttackPlayer()
     {
         agent.SetDestination(transform.position);
         transform.LookAt(player);
 
-        if (!alreadyAttack)
-        {
-            Rigidbody rb = Instantiate(projectile, shootingPos.transform.position, Quaternion.identity).GetComponent<Rigidbody>();
-            rb.AddForce(shootingPos.transform.forward * 40f, ForceMode.Impulse);
-            rb.AddForce(shootingPos.transform.up * 3f, ForceMode.Impulse);
-            alreadyAttack = true;
-            Invoke(nameof(ResetAttack), timeBetweenAttck);
-        }
+        laughing.Play();
+        jumpCam.SetActive(true);
+        playerCam.SetActive(false);
+
+        StartCoroutine(Death());
     }
 
-    private void ResetAttack()
+    IEnumerator Death()
     {
-        alreadyAttack = false;
+        yield return new WaitForSeconds(1.5f);
+        SceneManager.LoadScene("Dead");
     }
-
-    public void TakeDamage(int amt)
-    {
-        health -= amt;
-        if (health <= 0)
-        {
-            Destroy(gameObject);
-        }
-    }
-
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;

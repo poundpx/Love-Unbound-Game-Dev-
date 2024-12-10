@@ -19,8 +19,6 @@ public class Door : MonoBehaviour
 
     private bool inReach;
     private bool doorisOpen;
-    private bool doorisClosed;
-    public bool locked;
     public bool unlocked;
 
 
@@ -29,7 +27,7 @@ public class Door : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.tag == "Reach" && doorisClosed)
+        if (other.gameObject.tag == "Reach" && !doorisOpen)
         {
             inReach = true;
             openText.SetActive(true);
@@ -56,7 +54,6 @@ public class Door : MonoBehaviour
     void Start()
     {
         inReach = false;
-        doorisClosed = true;
         doorisOpen = false;
         closeText.SetActive(false);
         openText.SetActive(false);
@@ -69,45 +66,43 @@ public class Door : MonoBehaviour
     {
         if (lockOB.activeInHierarchy)
         {
-            locked = true;
             unlocked = false;
         }
 
         else
         {
             unlocked = true;
-            locked = false;
         }
 
+        //unlock
         if (inReach && keyOB.activeInHierarchy && Input.GetButtonDown("Interact"))
         {
             unlockedSound.Play();
-            locked = false;
+            unlocked = true;
             keyOB.SetActive(false);
             StartCoroutine(unlockDoor());
         }
 
-        if (inReach && doorisClosed && unlocked && Input.GetButtonDown("Interact"))
+        //Open Door
+        if (inReach && !doorisOpen && unlocked && Input.GetButtonDown("Interact"))
         {
             door.SetBool("Open", true);
-            door.SetBool("Closed", false);
             openText.SetActive(false);
             openSound.Play();
             doorisOpen = true;
-            doorisClosed = false;
         }
 
+        //Close Door
         else if (inReach && doorisOpen && unlocked && Input.GetButtonDown("Interact"))
         {
             door.SetBool("Open", false);
-            door.SetBool("Closed", true);
             closeText.SetActive(false);
             closeSound.Play();
-            doorisClosed = true;
             doorisOpen = false;
         }
 
-        if (inReach && locked && Input.GetButtonDown("Interact"))
+        //Lock Door
+        if (inReach && !unlocked && Input.GetButtonDown("Interact"))
         {
             openText.SetActive(false);
             lockedText.SetActive(true);
