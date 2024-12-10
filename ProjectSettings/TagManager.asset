@@ -3,10 +3,7 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags:
-  - Enemy
-  - CinemachineTarget
-  - Reach
+  tags: []
   layers:
   - Default
   - TransparentFX
@@ -14,9 +11,9 @@ TagManager:
   - whatIsGround
   - Water
   - UI
-  - Player
-  - Enemy
-  - Reach
+  - 
+  - 
+  - 
   - 
   - 
   - 

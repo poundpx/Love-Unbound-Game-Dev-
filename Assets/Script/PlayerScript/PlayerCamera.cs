@@ -4,27 +4,31 @@ using UnityEngine;
 
 public class PlayerCamera : MonoBehaviour
 {
-    public float mouseSensitivity = 100f;
+    public float sensX;
+    public float sensY;
 
-    public Transform playerBody;
-
-    float xRotation = 0;
-    // Start is called before the first frame update
-    void Start()
+    float xRotation;
+    float yRotation;
+    public Transform orientation;
+    
+    private void Start()
     {
+        //Lock Cursor
         Cursor.lockState = CursorLockMode.Locked;
-
+        Cursor.visible = false;
     }
-
-    // Update is called once per frame
     void Update()
     {
-        float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
+        //Get x and y mouse move then clamp up and down camera
+        float mouseX = Input.GetAxisRaw("Mouse X") * Time.deltaTime * sensX;
+        float mouseY = Input.GetAxisRaw("Mouse Y") * Time.deltaTime * sensY;
 
+        yRotation += mouseX;
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
-        playerBody.Rotate(Vector3.up * mouseX);
-        transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+
+        //then rotate camera along with y rotation if camera move y axis
+        transform.rotation = Quaternion.Euler(xRotation, yRotation, 0);
+        orientation.rotation = Quaternion.Euler(0, yRotation, 0); 
     }
 }

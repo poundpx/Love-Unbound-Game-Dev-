@@ -1,56 +1,107 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Animations;
 
 public class PlayerMovement : MonoBehaviour
 {
-    public CharacterController characterController;
-    public float runSpeed = 20f;
-    public int health = 3;
-    public float walkSpeed = 12f;
-    public float gravity = -9.81f;
-    public Transform groundCheck;
-    public float groundDist = .4f;
-    public LayerMask groundLayerMask;
-    public float JumpHeight = 3f;
-    
-    private Animator animator;
+    [Header("Movement")]
+    public float moveSpeed;
+    public Transform orientation;
 
-    Vector3 velocity;
+
+
+    public float groundDrag;
+
+    public float jumpForce;
+    public float jumpCoolDown;
+    public float airMultiplier;
+    bool readyToJump;
+    [Header("Keybinds")]
+    public KeyCode jumpKey = KeyCode.Space;
+
+    [Header("Ground Check")]
+    public float playerHeight;
+    public LayerMask whatIsGround;
     bool grounded;
 
-    // Update is called once per frame
-    void Update()
+    float horizontalInput;
+    float verticalInput;
+    Vector3 moveDirection;
+    Rigidbody rb;
+
+    //get rigidbody and prevent rotation when start game
+    private void Start()
     {
-        //check for ground
-        grounded = Physics.CheckSphere(groundCheck.position, groundDist, groundLayerMask);
+        rb = GetComponent<Rigidbody>();
+        rb.freezeRotation = true;
+        readyToJump = true;
+    }
+    //use update to get input each frame
+    private void Update()
+    {
+        //ground check
+        grounded = Physics.Raycast(transform.position, Vector3.down, playerHeight * .5f + .2f, whatIsGround);
 
-        if (grounded && velocity.y < 0)
+        MyInput();
+        if (grounded)
         {
-            velocity.y = -2f;
+            rb.drag = groundDrag;
         }
-        //movement
-        float x = Input.GetAxis("Horizontal");
-        float z = Input.GetAxis("Vertical");
+        else rb.drag = 0;
 
-        Vector3 move = transform.right * x + transform.forward * z;
-        characterController.Move(move * walkSpeed * Time.deltaTime);
+    }
+    //call physic engine update 
+    private void FixedUpdate()
+    {
+        MovePlayer();
+        SpeedControl();
+    }
 
-        //Run
-        if (move != null & Input.GetKey(KeyCode.LeftShift))
+    //get input and move player by add force to rigid body
+    private void MyInput()
+    {
+        horizontalInput = Input.GetAxisRaw("Horizontal");
+        verticalInput = Input.GetAxisRaw("Vertical");
+
+        //when to jump
+        if(Input.GetKey(jumpKey)&& readyToJump  && grounded)
         {
-            characterController.Move(move * runSpeed * Time.deltaTime);
+            Debug.Log("Player is jumping");
+            readyToJump = false;
+            Jump();
+            Invoke(nameof(ResetJump), jumpCoolDown);
         }
-
-        //jump
-        if (Input.GetButtonDown("Jump") && grounded)
+    }
+    private void MovePlayer()
+    {
+        moveDirection = orientation.forward * verticalInput + orientation.right * horizontalInput;
+        if (grounded)
         {
-            velocity.y = Mathf.Sqrt(JumpHeight * -2f * gravity);
+            rb.AddForce(moveDirection.normalized * moveSpeed * 10f, ForceMode.Force);
         }
-        velocity.y += gravity * Time.deltaTime;
-        characterController.Move(velocity * Time.deltaTime);
+        else if (!grounded)
+        {
+            rb.AddForce(moveDirection.normalized * moveSpeed * 10f *airMultiplier, ForceMode.Force);
+        }
+    }
+    private void SpeedControl()
+    {
+        Vector3 flatVel = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+        if (flatVel.magnitude > moveSpeed)
+        {
+            Vector3 limitedVel = flatVel.normalized * moveSpeed;
+            rb.velocity = new Vector3(limitedVel.x,rb.velocity.y,limitedVel.z);
+        }
+    }
+    private void Jump()
+    {
+        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+        rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+    }
+    private void ResetJump()
+    {
 
+        readyToJump = true;
     }
 
 }
