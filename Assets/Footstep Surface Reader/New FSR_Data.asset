@@ -15,4 +15,9 @@ MonoBehaviour:
   surfaces:
   - name: GRASS
     soundEffects:
-    - {fileID: 8300000, guid: 37d7e8715c879f64e84b62f22b10e94b, type: 3}
+    - {fileID: 8300000, guid: 08d9a1725afbe314180542ee8e3db362, type: 3}
+    - {fileID: 8300000, guid: 0f3894790715457438216d6fc9025536, type: 3}
+  - name: Wood
+    soundEffects:
+    - {fileID: 8300000, guid: 51cad263dde71bb4f829628ad938c0d1, type: 3}
+    - {fileID: 8300000, guid: 5b4273460be30e14cb7a4c27361130db, type: 3}
