@@ -15,6 +15,8 @@ public class NoteBookPickUp : MonoBehaviour
     public bool inReach;
     public string notebookStory;
 
+    //player object for com with notebook collect
+    public GameObject Player;
 
     void Start()
     {
@@ -56,6 +58,7 @@ public class NoteBookPickUp : MonoBehaviour
     }
     private void ShowNoteBookStory()
     {
+        Player.GetComponent<ItemCollect>().Collect();
         pickUpText.SetActive(false);
         storyPanel.SetActive(true);
         storyDescription.text = notebookStory;
@@ -68,10 +71,11 @@ public class NoteBookPickUp : MonoBehaviour
     public void CloseStoryPanel()
     {
         storyPanel.SetActive(false);
-
         //disabled cursor and continue game
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
         Time.timeScale = 1;
+
+        //increase NoteBOOK item
     }
 }
