@@ -11,30 +11,27 @@ public class FlashLight : MonoBehaviour
     public AudioSource turnOff;
 
     public bool on;
-    public bool off;
 
     // Start is called before the first frame update
     void Start()
     {
-        off = true;
+        on = false;
         flashLight.SetActive(false);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (off && Input.GetButtonDown("F"))
+        if (!on && Input.GetButtonDown("F"))
         {
             flashLight.SetActive(true);
             turnOn.Play();
-            off = false;
             on = true;
         }
         else if (on && Input.GetButtonDown("F"))
         {
             flashLight.SetActive(false);
             turnOff.Play();
-            off = true;
             on = false;
         }
     }
