@@ -5,6 +5,11 @@ using UnityEngine.SceneManagement;
 
 public class DeathMenu : MonoBehaviour
 {
+    private void Start()
+    {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
     public void RetryBtn()
     {
         SceneManager.LoadScene("Testing");

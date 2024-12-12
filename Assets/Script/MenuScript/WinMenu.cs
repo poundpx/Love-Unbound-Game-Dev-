@@ -5,6 +5,11 @@ using UnityEngine.SceneManagement;
 
 public class WinMenu : MonoBehaviour
 {
+    private void Start()
+    {
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
     public void MainMenu()
     {
         SceneManager.LoadScene("Menu");
